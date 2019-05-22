@@ -38,12 +38,11 @@ fs.readFile(__dirname + '/db_config.xml', function(err, data) {
     parser.parseString(data, function (err, result) {
 		if (err) throw err;
     host = result.dbconfig.host[0];
-		user = result.dbconfig.user[0];
+    user = result.dbconfig.user[0];
     password = result.dbconfig.password[0];
     database = result.dbconfig.database[0];
-    port = result.dbconfig.port[0];
 
-    connectToDB(host,user,password,database,port);
+    connectToDB(host,user,password,database);
 
 	});
 });
@@ -334,17 +333,18 @@ function getListOfUsers(res){
 }
 
 
-function connectToDB(host, user, password , database, port){
+function connectToDB(host, user, password , database){
+console.log(database);
   connection = mysql.createConnection({
     host: host,
     user: user, // replace with the database user provided to you
     password: password,// replace with the database password provided to you
-    database: database,
-    port: port
+    database: database
   });
 
   connection.connect(function(err) {
     if (err) {
+      console.log(err);
       throw err;
     };
     console.log("Connected to MYSQL database!");
