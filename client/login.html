@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    	<meta charset="utf-8">
+    	<meta name="viewport" content="width=device-width, initial-scale=1">
+	    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	    <link rel="stylesheet" type="text/css" href="client/css/style.css">
+	    <title>Welcome to Node.js</title>
+  </head>
+
+  <body>
+
+
+<div id = "myForm" class = "jumbotron">
+  <h1> Login </h1>
+
+    <form action="/sendLoginDetails" method="post">
+      <label><b>Username</b></label>
+      <input id = "username" type = "text" name = "username" placeholder= " Username ">
+    </br>
+      <label><b>Password</b></label>
+      <input id = "password" type = "text" name = "password" placeholder= " Password ">
+    </br>
+      <input type="submit" class="btn btn-primary btn-block" value="Submit">
+    </form>
+</div>
+
+    <script>
+    var xml = new XMLHttpRequest()
+    var url = '/login'
+    xml.open("GET" , url , true);
+    xml.send();
+
+    xml.onreadystatechange = function(){
+      if(xml.status == 401){
+        console.log("status401")
+
+        window.alert("               Incorrect Login \n Login Details are case-sensitive")
+      }
+
+    }
+
+
+
+
+    </script>
+  </body>
+</html>
