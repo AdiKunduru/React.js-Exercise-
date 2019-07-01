@@ -1,4 +1,3 @@
-
 <html>
   <head>
     <meta charset="utf-8">
@@ -38,8 +37,6 @@
       
 <script type="text/babel">
       
-
-
   var Student = React.createClass({
       getInitialState(){
           return{
@@ -47,7 +44,13 @@
               isAdding : false,
               editingKey : undefined,
               rows : this.props.data.rows,
-              cols : this.props.data.cols
+              cols : this.props.data.cols,
+              id : undefined,
+              name : undefined,
+              login : undefined,
+              password : undefined
+              
+              
           }
       },
       
@@ -56,10 +59,23 @@
       },
       
       delete(id){
-         var deleteArr = rows
-         deleteArr.filter(function(row){
-             return(id !== row["acc_id"])
+         console.log(id)
+         var deleteArr = this.state.rows 
+         deleteArr = deleteArr.filter(function(row){
+             console.log(row["acc_id"])
+             return id !== row["acc_id"]
          })
+         console.log(deleteArr)
+          
+         //Make AJAX Post with new deleteArr
+          var id = {acc_id : id}
+            $.ajax({
+               url: '/deleteUser',
+               type: 'POST',
+               dataType: 'JSON',
+               data: id,
+               success: console.log("Deleted User")
+            });
          this.setState({rows : deleteArr, editingKey : undefined})
       },
       
@@ -71,20 +87,65 @@
         this.setState({isEditing : false, isAdding : true, editingKey : undefined}) 
       },
       
-      addRow(id, name, login, passwd){
+      handleIDChange(e){
+          this.setState({id : e.target.value})
+      },
+      
+      handleNameChange(e){
+         this.setState({name : e.target.value}) 
+      },
+      
+      handleLoginChange(e){
+         this.setState({login : e.target.value})
+      },
+      
+      handlePasswordChange(e){
+         this.setState({password : e.target.value})  
+      },
+      
+      addRow(){
+        
         //Cannot add someone with same ID or Name 
-         var addingArr = rows
-         addingArr.filter(function(row){
-             return(this.state.editingKey !== row["acc_id"])
+         var addingArr = this.state.rows
+         var table = this
+         addingArr = addingArr.filter(function(row){
+             return(table.state.editingKey !== row["acc_id"])
          })
+          console.log(addingArr)
           addingArr.map(function(row){
-             if(id === row["acc_id"] || name === row["acc_name"]){
+             if(table.state.id === row["acc_id"] || table.state.name === row["acc_name"]){
                  throw Error("Account Id or Username is already in use")
              }
          })
           
-         createRow = {"acc_id" : id, "acc_name" : name, "acc_login" : login, "acc_password" : passwd}
+         var createRow = {"acc_id" : this.state.id, "acc_name" : this.state.name, "acc_login" : this.state.login, "acc_password" : this.state.password}
          addingArr.push(createRow)
+          
+            var user =
+              {
+                  acc_id : this.state.id,
+                  acc_login : this.state.login,
+                  acc_name : this.state.name,
+                  acc_password : this.state.password,
+              }
+
+            if(this.state.isAdding){
+                 $.ajax({
+                 url: '/addUser',
+                 type: 'POST',
+                 dataType: 'JSON',
+                 data: user,
+                 success: console.log("User Added")
+            });   
+            }else{
+            $.ajax({
+                 url: '/updateUser',
+                 type: 'POST',
+                 dataType: 'JSON',
+                 data: user,
+                 success: console.log("User Added")
+            });
+            }
          this.setState({rows : addingArr , isAdding : false, isEditing : false, editingKey : undefined})
          
       },
@@ -94,11 +155,9 @@
           var rows = this.state.rows
           var cols = this.state.cols
           
-
           var studentButtons = this
           //If you are adding
           if (this.state.isAdding) {
-              console.log("hello world")
             var tableHeaders = (
             <thead>
             <tr>    
@@ -118,23 +177,21 @@
                     console.log(row)
                     
                     return(
-                    <tr id = "15">
+                    <tr>
                         {cols.map(function(col){
                         col = col.replace(" ", "_")   
                         if (col.toLowerCase() === "edit") {
-                            return (<td><button onClick = {() => studentButtons.edit}> Edit </button></td>);
+                            return (<td><button onClick = {() => studentButtons.edit(row["acc_id"])}> Edit </button></td>);
                         } else if (col.toLowerCase() === "delete") {
-                            return (<td><button onClick = {studentButtons.delete}> Delete </button></td>);
+                            return (<td><button onClick = {() => studentButtons.delete(row["acc_id"])}> Delete </button></td>);
                         } else {
                             return (<td>{row[col.toLowerCase()]}</td>);
                         }
-
                         })}
                     </tr>
                     )
     
                 })
-
                 
                 }
             </tbody>
@@ -142,19 +199,15 @@
             
             var addingRow = (
                 <tr>
-                <td id = "adding_id"><input placeholder = "ID"></input></td>
-                <td id = "adding_username"><input placeholder = "Username"></input></td>
-                <td id = "adding_login"><input placeholder = "Login"></input></td>
-                <td id = "adding_password"><input placeholder = "Password"></input></td>
+                <td id = "adding_id"><input placeholder = "ID" onChange = {this.handleIDChange}></input></td>
+                <td id = "adding_username"><input placeholder = "Username" onChange = {this.handleNameChange}></input></td>
+                <td id = "adding_login"><input placeholder = "Login" onChange = {this.handleLoginChange}></input></td>
+                <td id = "adding_password"><input placeholder = "Password" onChange = {this.handlePasswordChange}></input></td>
                 </tr>
             )
-            var acc_id = document.getElementById("adding_id")
-            var username = document.getElementById("adding_id")
-            var login = document.getElementById("adding_id")
-            var password = document.getElementById("adding_id")
             
             var addButton = (
-                <button onClick = {this.addRow(acc_id,username,login,password)}> Confirm </button>
+                <button onClick = {() => this.addRow()}> Confirm </button>
             )
             
             var cancel = (
@@ -195,19 +248,25 @@
                 {
                 rows.map(function(row){
                     if(row["acc_id"] === studentButtons.state.editingKey){
-                        console.log(row["acc_id"])
                         return(
                         <tr key = {row["acc_id"]}>
                             {cols.map(function(col){
                             col = col.replace(" ", "_")   
                             if (col.toLowerCase() === "edit") {
-                                return (<td><button onClick = {studentButtons.addRow}> Confirm </button></td>)
+                                return (<td><button onClick = {() => studentButtons.addRow()}> Confirm </button></td>)
                             } else if (col.toLowerCase() === "delete"){
-                                return (<td><button onClick = {studentButtons.cancel}> Cancel </button></td>)
+                                return (<td><button onClick = {() => studentButtons.cancel()}> Cancel </button></td>)
                             }
-                            else{
-                                return (<td><input type = "text"></input></td>);
+                            else if (col.toLowerCase() === "acc_id"){
+                                return (<td><input type = "text" onChange = {studentButtons.handleIDChange}></input></td>);
+                            } else if (col.toLowerCase() === "acc_name"){
+                                return (<td><input type = "text" onChange = {studentButtons.handleNameChange}></input></td>);
+                            } else if (col.toLowerCase() === "acc_login"){
+                                return (<td><input type = "text" onChange = {studentButtons.handleLoginChange}></input></td>);
+                            } else if (col.toLowerCase() === "acc_password"){
+                                return (<td><input type = "text" onChange = {studentButtons.handlePasswordChange}></input></td>);
                             }
+                            
                             })}
                           </tr>
                     ) 
@@ -217,14 +276,13 @@
                         {cols.map(function(col){
                         col = col.replace(" ", "_")   
                         if (col.toLowerCase() === "edit") {
-                            return (<td><button onClick = {studentButtons.addRow}> Confokokcokwkek</button></td>)
+                            return (<td><button onClick = {() => studentButtons.addRow(this)}> Confirm</button></td>)
                         } else if (col.toLowerCase() === "delete"){
-                            return (<td><button onClick = {studentButtons.cancel}> Cancel </button></td>)
+                            return (<td><button onClick = {() => studentButtons.cancel()}> Cancel </button></td>)
                         }
                         else{
                             return (<td>{row[col.toLowerCase()]}</td>);
                         }
-
                         })}
                     </tr>
                     )}
@@ -253,7 +311,6 @@
               
           //Not Editing or Adding      
           } else {         
-
             var tableHeaders = (
             <thead>
             <tr>    
@@ -277,14 +334,13 @@
                         cols.map(function(col){
                         
                         if(col.toLowerCase() === "edit"){
-                            return (<td> <button onClick = {() => studentButtons.edit(row["acc_id"])}>Edit </button> </td>)
+                            return (<td> <button onClick = {() => studentButtons.edit(row["acc_id"])}>Edit</button> </td>)
                         } else if (col.toLowerCase() === "delete"){
-                            return (<td><button onClick = {studentButtons.delete}> Delete </button></td>)
+                            return (<td><button onClick = {() => studentButtons.delete(row["acc_id"])}>Delete</button></td>)
                         }
                         else{
                             return (<td>{row[col.toLowerCase()]}</td>);
                         }
-
                         })}
                     </tr>
                     )
@@ -297,7 +353,7 @@
          
             
             var addButton = (
-            <button onClick = {this.addMode}> Add User </button>
+            <button onClick = {() => this.addMode()}> Add User </button>
             )
             
             return (
@@ -311,25 +367,24 @@
                 </div>
                 </div>
             )
-//            return(
-//               
-//            )
+
             
           }
       }
   });
-
   var xml = new XMLHttpRequest()
   var url = '/getListofUsers'
   xml.open("GET", url, true);
   xml.send();
-
+  console.log("change")
   xml.onreadystatechange = function(){
+     console.log(xml.readyState)
     if(xml.readyState === 4 && xml.status === 200){
       console.log("i am here")
       //Format so it fits the table
       var json = JSON.parse(xml.responseText)
       var tableRows = json   
+      console.log(json)
       var tableCols = ["acc_id", "acc_name", "acc_login", "acc_password", "Edit" , "Delete"]
       var tableData = {cols : tableCols , rows : tableRows};
         

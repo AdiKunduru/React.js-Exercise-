@@ -231,7 +231,7 @@ function updateUser(id, name, login ,password){
 		acc_id : id,
 		acc_name : name,
 		acc_login : login,
-		acc_password : password
+		acc_password : crypto.createHash('sha256').update(acc_password).digest('base64')
 	}
 
 	connection.query('UPDATE tbl_accounts SET ? WHERE acc_id = ?' , [rowToBeUpdated , id] , function(err,result){
@@ -308,6 +308,7 @@ function getListEvent(res){
     }
     if(rows.length === 0){
       console.log("there is nothing here")
+      res.send([])
     }else{
       var responseArr = [];
       res.send(rows)
@@ -322,6 +323,7 @@ function getListOfUsers(res){
 		}
 		if (rows.length === 0) {
 			console.log("there is nothing here")
+            res.send([])
 		} else {
 			var responseArr = [];
 			res.send(rows)
