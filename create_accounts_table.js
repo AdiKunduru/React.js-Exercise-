@@ -10,7 +10,7 @@ var con = mysql.createConnection({
   host: "localhost",
   user: "root", // replace with the database user provided to you
   password: "admin", // replace with the database password provided to you
-  database: "csci4131"
+  database: "react_ex"
 });
 
 con.connect(function(err) {

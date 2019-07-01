@@ -11,7 +11,7 @@ var con = mysql.createConnection({
   host: "localhost",
   user: "root", // replace with the database user provided to you
   password: "admin", // replace with the database password provided to you
-  database: "csci4131"
+  database: "react_ex"
 });
 
 con.connect(function(err) {
@@ -27,7 +27,6 @@ con.connect(function(err) {
     acc_password: crypto.createHash('sha256').update("tango").digest('base64') // replace with acc_password chosen by you OR retain the same value
   };
 
-  var sql = ``;
   con.query('INSERT tbl_accounts SET ?', rowToBeInserted, function(err, result) {
     if(err) {
       throw err;

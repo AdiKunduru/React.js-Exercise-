@@ -6,7 +6,10 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  </head>
+
+      
+    
+    </head>
   <body>
       <nav class="navbar navbar-default">
           <div class="container-fluid">
@@ -23,6 +26,7 @@
       <br><br>
       <div class="container">
           <table class="table" id="scheduleTable">
+<!--
               <thead>
                   <tr>
                       <th scope="col">Event Name</th>
@@ -33,11 +37,25 @@
 
                   </tr>
               </thead>
-              <tbody></tbody>
+-->
+              
           </table>
+          
+          <div id = "addHere"></div>
       </div>
 
-      <script>
+      
+           
+<script src="https://cdn.jsdelivr.net/react/0.14.0-rc1/react.js"></script>
+<script src="https://cdn.jsdelivr.net/react/0.14.0-rc1/react-dom.js"></script>
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+<script type="text/babel">
+
+
+    'use strict';
+
+
 
 
   var xml = new XMLHttpRequest()
@@ -48,31 +66,84 @@
   xml.onreadystatechange = function(){
 
     if(xml.readyState == 4 && xml.status == 200){
-      console.log("i am here")
+      //console.log(xml.responseText)
       //Format so it fits the table
-      json = JSON.parse(xml.responseText)
-      table = document.getElementById("scheduleTable");
+      var json = JSON.parse(xml.responseText)
+   
+      var tableCols = ["Event Name", "Event Location", "Event Day", "Start Time", "End Time"]
+      var tableRows = json 
+      
+      var tableData = {cols : tableCols , rows : tableRows};
+            
+               console.log(tableCols)
+        //{} contains JSX elements which are variables
+        var TableComponent = React.createClass({
+        render: function() {
+            
+        var cols = this.props.data.cols
+        var rows = this.props.data.rows
+        
+        var tableHeaders = (
+        <thead >
+        <tr>    
+            {cols.map(function(col)
+                      { 
+                        return (<th>{col}</th>)      
+                      }
+                     )}
+        </tr>
+        </thead>
+        )
+        
+        var tableRows = (
+        <tbody>
+            {
+                rows.map(function(row){
+                   // row.toLowerCase();
+                    console.log(row)
+                    return(
+                    <tr>
+                            
+                        {cols.map(function(col){
+                            //changing the Table headers to the table entry rows in SQL
+                            col = col.replace(" ", "_")
+                            console.log(row[col.toLowerCase()])
+                                
+                            return (<td>{row[col.toLowerCase()]}</td>);
+                        })}
+                            
+                    </tr>
+                    );
+                })
+            }
+        </tbody>
+        )
+        
+        
+        
+        
+        return (
+                <table> 
+                {tableHeaders}
+                {tableRows}
+                </table>
+               )
+    }});
+        
+    var element = <TableComponent data = {tableData} />
+    ReactDOM.render(
+    
+        element,document.getElementById("addHere")
 
-
-      for (var i = 0; i < json.length; i++) {
-        var row = table.insertRow(-1);
-        var cell1 = row.insertCell(0);
-        var cell2 = row.insertCell(1);
-        var cell3 = row.insertCell(2);
-        var cell4 = row.insertCell(3);
-        var cell5 = row.insertCell(4);
-
-        cell1.innerHTML = json[i].event_name
-        cell2.innerHTML = json[i].event_location
-        cell3.innerHTML = json[i].event_day
-        cell4.innerHTML = json[i].event_start_time
-        cell5.innerHTML = json[i].event_end_time
-
-      }
-
-
+    );
+        
     }
   }
+  
+
+ 
+
+
 </script>
   </body>
 </html>

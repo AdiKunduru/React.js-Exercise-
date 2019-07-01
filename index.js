@@ -211,8 +211,8 @@ function postEvent(eventName , eventLocation, eventDay, eventStartTime, eventEnd
     event_name : eventName,
     event_location : eventLocation,
     event_day : eventDay,
-    event_start_time : eventStartTime,
-    event_end_time : eventEndTime
+    start_time : eventStartTime,
+    end_time : eventEndTime
   };
 
   connection.query('INSERT tbl_events SET ?', rowToBeInserted, function(err, result) {
@@ -324,9 +324,6 @@ function getListOfUsers(res){
 			console.log("there is nothing here")
 		} else {
 			var responseArr = [];
-			currentUserDP = {currentUser : currentUser}
-			rows.push(currentUserDP)
-			console.log(rows)
 			res.send(rows)
 		}
 	});

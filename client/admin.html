@@ -17,7 +17,6 @@
                   <li><a href="/stock"><b>Stock Page</b></a></li>
                   <li><a href="/admin"><b>Admin</b></a></li>
                   <li><a href = "/logout"><b>Logout</b></a></li>
-                  <li id = "userWelcome"> <b>Welcome</b> </li>
               </ul>
           </div>
       </nav>
@@ -25,275 +24,325 @@
 
 
       <div class="container">
-          <h3 id = "errors"> Error Messages </h3>
-          <button type="button" name="button" onclick = "addUser()"> Add User + </button>
           <table class="table" id="userTable">
-              <thead>
-                  <tr>
-                      <th scope="col">ID</th>
-                      <th scope="col">Name</th>
-                      <th scope="col">Login</th>
-                      <th scope="col">New Password</th>
-                      <th scope = "col"> Edit User </th>
-                      <th scope = "col"> Delete User </th>
-                  </tr>
-              </thead>
-              <tbody></tbody>
           </table>
+          <div id = "students-table"></div>
       </div>
 
-      <script>
 
-  document.getElementById("errors").style.visibility = "hidden";
-  document.getElementById("errors").style.textAlign = "center";
-  var currentUser;
-  var idOfNext;
-  var logins = [];
+      
+      
+<script src="https://cdn.jsdelivr.net/react/0.14.0-rc1/react.js"></script>
+<script src="https://cdn.jsdelivr.net/react/0.14.0-rc1/react-dom.js"></script>
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+      
+<script type="text/babel">
+      
+
+
+  var Student = React.createClass({
+      getInitialState(){
+          return{
+              isEditing : false,
+              isAdding : false,
+              editingKey : undefined,
+              rows : this.props.data.rows,
+              cols : this.props.data.cols
+          }
+      },
+      
+      edit(id) {
+          this.setState({isEditing : true , isAdding : false, editingKey : id})
+      },
+      
+      delete(id){
+         var deleteArr = rows
+         deleteArr.filter(function(row){
+             return(id !== row["acc_id"])
+         })
+         this.setState({rows : deleteArr, editingKey : undefined})
+      },
+      
+      cancel(){
+        this.setState({isEditing : false , isAdding : false, editingKey : undefined})
+      },
+      
+      addMode(){
+        this.setState({isEditing : false, isAdding : true, editingKey : undefined}) 
+      },
+      
+      addRow(id, name, login, passwd){
+        //Cannot add someone with same ID or Name 
+         var addingArr = rows
+         addingArr.filter(function(row){
+             return(this.state.editingKey !== row["acc_id"])
+         })
+          addingArr.map(function(row){
+             if(id === row["acc_id"] || name === row["acc_name"]){
+                 throw Error("Account Id or Username is already in use")
+             }
+         })
+          
+         createRow = {"acc_id" : id, "acc_name" : name, "acc_login" : login, "acc_password" : passwd}
+         addingArr.push(createRow)
+         this.setState({rows : addingArr , isAdding : false, isEditing : false, editingKey : undefined})
+         
+      },
+      
+      //Displays Table, Different versions for Editing and Adding
+      render: function(){
+          var rows = this.state.rows
+          var cols = this.state.cols
+          
+
+          var studentButtons = this
+          //If you are adding
+          if (this.state.isAdding) {
+              console.log("hello world")
+            var tableHeaders = (
+            <thead>
+            <tr>    
+                {cols.map
+                    (function(col){ 
+                        return (<th>{col}</th>)   
+                    }
+                )}
+            </tr>
+            </thead>
+            )
+            
+            var tableBody = (
+            <tbody>
+                {
+                rows.map(function(row){
+                    console.log(row)
+                    
+                    return(
+                    <tr id = "15">
+                        {cols.map(function(col){
+                        col = col.replace(" ", "_")   
+                        if (col.toLowerCase() === "edit") {
+                            return (<td><button onClick = {() => studentButtons.edit}> Edit </button></td>);
+                        } else if (col.toLowerCase() === "delete") {
+                            return (<td><button onClick = {studentButtons.delete}> Delete </button></td>);
+                        } else {
+                            return (<td>{row[col.toLowerCase()]}</td>);
+                        }
+
+                        })}
+                    </tr>
+                    )
+    
+                })
+
+                
+                }
+            </tbody>
+            )
+            
+            var addingRow = (
+                <tr>
+                <td id = "adding_id"><input placeholder = "ID"></input></td>
+                <td id = "adding_username"><input placeholder = "Username"></input></td>
+                <td id = "adding_login"><input placeholder = "Login"></input></td>
+                <td id = "adding_password"><input placeholder = "Password"></input></td>
+                </tr>
+            )
+            var acc_id = document.getElementById("adding_id")
+            var username = document.getElementById("adding_id")
+            var login = document.getElementById("adding_id")
+            var password = document.getElementById("adding_id")
+            
+            var addButton = (
+                <button onClick = {this.addRow(acc_id,username,login,password)}> Confirm </button>
+            )
+            
+            var cancel = (
+            <button onClick = {this.cancel}> Cancel </button>
+            )
+            
+            return (
+                <div>
+                <table> 
+                {tableHeaders}
+                {tableBody}
+                {addingRow}
+                </table>
+                 <div>
+                {addButton}
+                {cancel}
+                </div>
+                </div>
+            ) 
+           
+          //If Editing      
+          } else if(this.state.isEditing) {
+             
+            var tableHeaders = (
+            <thead>
+            <tr>    
+                {cols.map
+                    (function(col){ 
+                        return (<th>{col}</th>)   
+                    }
+                )}
+            </tr>
+            </thead>
+            )
+            
+            var tableBody = (
+            <tbody>
+                {
+                rows.map(function(row){
+                    if(row["acc_id"] === studentButtons.state.editingKey){
+                        console.log(row["acc_id"])
+                        return(
+                        <tr key = {row["acc_id"]}>
+                            {cols.map(function(col){
+                            col = col.replace(" ", "_")   
+                            if (col.toLowerCase() === "edit") {
+                                return (<td><button onClick = {studentButtons.addRow}> Confirm </button></td>)
+                            } else if (col.toLowerCase() === "delete"){
+                                return (<td><button onClick = {studentButtons.cancel}> Cancel </button></td>)
+                            }
+                            else{
+                                return (<td><input type = "text"></input></td>);
+                            }
+                            })}
+                          </tr>
+                    ) 
+                    }else{
+                    return(
+                    <tr key = {row["acc_id"]}>
+                        {cols.map(function(col){
+                        col = col.replace(" ", "_")   
+                        if (col.toLowerCase() === "edit") {
+                            return (<td><button onClick = {studentButtons.addRow}> Confokokcokwkek</button></td>)
+                        } else if (col.toLowerCase() === "delete"){
+                            return (<td><button onClick = {studentButtons.cancel}> Cancel </button></td>)
+                        }
+                        else{
+                            return (<td>{row[col.toLowerCase()]}</td>);
+                        }
+
+                        })}
+                    </tr>
+                    )}
+    
+                })        
+                }
+            </tbody>
+            )
+    
+            var addButton = (
+            <button onClick = {this.addMode}> Add User </button>
+            )
+            
+            return (
+                <div>
+                    <table> 
+                        {tableHeaders}
+                        {tableBody}
+                    </table>
+                    <div>
+                        {addButton}
+                    </div>
+                </div>            
+            )
+        
+              
+          //Not Editing or Adding      
+          } else {         
+
+            var tableHeaders = (
+            <thead>
+            <tr>    
+                {cols.map
+                    (function(col){ 
+                        return (<th>{col}</th>)   
+                    }
+                )}
+            </tr>
+            </thead>
+            )
+            
+            var tableBody = (
+            <tbody>
+                {
+                rows.map(function(row){
+                    console.log(row)
+                    return(
+                    <tr>         
+                        {
+                        cols.map(function(col){
+                        
+                        if(col.toLowerCase() === "edit"){
+                            return (<td> <button onClick = {() => studentButtons.edit(row["acc_id"])}>Edit </button> </td>)
+                        } else if (col.toLowerCase() === "delete"){
+                            return (<td><button onClick = {studentButtons.delete}> Delete </button></td>)
+                        }
+                        else{
+                            return (<td>{row[col.toLowerCase()]}</td>);
+                        }
+
+                        })}
+                    </tr>
+                    )
+    
+                })        
+                }
+            </tbody>
+            )
+            
+         
+            
+            var addButton = (
+            <button onClick = {this.addMode}> Add User </button>
+            )
+            
+            return (
+                <div>
+                <table> 
+                {tableHeaders}
+                {tableBody}
+                </table>
+                 <div>
+                {addButton}
+                </div>
+                </div>
+            )
+//            return(
+//               
+//            )
+            
+          }
+      }
+  });
+
   var xml = new XMLHttpRequest()
   var url = '/getListofUsers'
   xml.open("GET", url, true);
   xml.send();
 
   xml.onreadystatechange = function(){
-    console.log(xml.readyState)
     if(xml.readyState === 4 && xml.status === 200){
       console.log("i am here")
       //Format so it fits the table
-      json = JSON.parse(xml.responseText)
-      table = document.getElementById("userTable");
-
-
-      for (var i = 0; i < json.length - 1; i++) {
-        var row = table.insertRow(-1);
-        var cell1 = row.insertCell(0);
-        var cell2 = row.insertCell(1);
-        var cell3 = row.insertCell(2);
-        var cell4 = row.insertCell(3);
-        var cell5 = row.insertCell(4);
-        var cell6 = row.insertCell(5);
-        idOfNext = json[i].acc_id;
-        cell1.innerHTML = idOfNext;
-        cell1.id = "acc_id" + idOfNext
-        cell2.innerHTML = json[i].acc_name
-        cell2.id = "acc_name" + idOfNext
-
-        cell3.innerHTML = json[i].acc_login
-        logins.push([json[i].acc_login]);
-        cell3.id = "acc_login" + idOfNext
-        cell4.innerHTML = ""
-        cell4.id = "acc_password" + idOfNext
-        var editButton = document.createElement("button");
-        editButton.addEventListener("click" , editMode);
-        editButton.innerHTML = "Edit";
-        editButton.id = "edit" + idOfNext;
-        cell5.appendChild(editButton);
-        var deleteButton = document.createElement("button");
-        deleteButton.id = "delete" + idOfNext
-        deleteButton.addEventListener("click" , remove)
-        deleteButton.innerHTML = "Delete";
-        cell6.appendChild(deleteButton);
-      }
-
-      currentUser = json[json.length - 1].currentUser
-      document.getElementById("userWelcome").innerHTML = "Welcome " + currentUser + " !";
+      var json = JSON.parse(xml.responseText)
+      var tableRows = json   
+      var tableCols = ["acc_id", "acc_name", "acc_login", "acc_password", "Edit" , "Delete"]
+      var tableData = {cols : tableCols , rows : tableRows};
+        
+      var element = <Student data = {tableData} />
+      ReactDOM.render(
+        element,document.getElementById("students-table")
+     );
+        
     }
   }
-
-
-  function addUser(){
-    var table = document.getElementById("userTable")
-    console.log(table.rows.length - 1);
-    if(table.rows.length - 1 === 0){
-      newIdNum = 1;
-    }else{
-      newIdNum = idOfNext + 1;
-    }
-    var row = table.insertRow(-1);
-    var cell1 = row.insertCell(0);
-    var cell2 = row.insertCell(1);
-    var cell3 = row.insertCell(2);
-    var cell4 = row.insertCell(3);
-    var cell5 = row.insertCell(4);
-    var cell6 = row.insertCell(5);
-
-    var nameForm = document.createElement("input")
-    nameForm.type = "text";
-    nameForm.id = "newNameForm" + newIdNum;
-    cell2.appendChild(nameForm);
-    var loginForm = document.createElement("input")
-    loginForm.type = "text";
-    loginForm.id = "newLoginForm" + newIdNum;
-    cell3.appendChild(loginForm);
-    var passwordForm = document.createElement("input")
-    passwordForm.type = "text";
-    passwordForm.id = "newPasswordForm" + newIdNum;
-    cell4.appendChild(passwordForm);
-
-    var saveButton = document.createElement("button");
-    saveButton.id = newIdNum;
-    saveButton.innerHTML = "Save"
-    saveButton.removeEventListener("click" , editMode)
-    saveButton.addEventListener("click" , saveUser)
-    cell5.appendChild(saveButton);
-
-    var deleteButton = document.createElement("button");
-    deleteButton.id = "delete"+newIdNum;
-    deleteButton.innerHTML = "Cancel"
-    deleteButton.removeEventListener("click" , remove)
-    deleteButton.addEventListener("click" , cancel)
-    cell6.appendChild(deleteButton);
-
-  }
-
-
-  function saveUser(){
-    newIdNum = this.id
-    console.log(newIdNum)
-    if (validEdit(document.getElementById("newLoginForm" + newIdNum).value)){
-    user =
-    {
-        acc_id : newIdNum,
-        acc_login : document.getElementById("newLoginForm" + newIdNum).value,
-        acc_name : document.getElementById("newNameForm" + newIdNum).value,
-        acc_password : document.getElementById("newPasswordForm" + newIdNum).value
-    }
-
-
-
-    $.ajax({
-               url: '/addUser',
-               type: 'POST',
-               dataType: 'JSON',
-               data: user,
-               success: location.reload()
-    });
-    }
-  }
-
-  function cancel(){
-    location.reload()
-  }
-
-  function editMode(){
-    id = parseInt(this.id.substring(4,this.id.length) , 10);
-    console.log(parseInt(this.id.substring(4,this.id.length),10))
-    var nameForm = document.getElementById("acc_name" + id)
-    var oldNameInfo = nameForm.innerHTML;
-    nameForm.innerHTML = "";
-    var nameInput = document.createElement("input")
-    nameInput.id = "name" + id
-    nameForm.appendChild(nameInput);
-    var loginForm = document.getElementById("acc_login" + id)
-    var oldLoginInfo = loginForm.innerHTML;
-    loginForm.innerHTML = ""
-    var loginInput = document.createElement("input")
-    loginInput.id = "login" + id
-    loginForm.appendChild(loginInput);
-    var passwordForm = document.getElementById("acc_password" + id)
-    var oldPasswordInfo = passwordForm.innerHTML;
-    passwordForm.innerHTML = "";
-    var passwordInput = document.createElement("input")
-    passwordInput.id = "password" + id
-    passwordForm.appendChild(passwordInput);
-    var editButton = document.getElementById("edit" + id)
-    editButton.innerHTML = "Update"
-    editButton.addEventListener("click" , editMode)
-    editButton.addEventListener("click" , update)
-    var deleteButton = document.getElementById("delete" + id)
-    deleteButton.innerHTML = "Cancel"
-    deleteButton.removeEventListener("click" , remove)
-    deleteButton.addEventListener("click" , cancel)
-
-
-    function update(){
-
-      if(validEdit(loginInput.value)){
-      user =
-      {
-          acc_id : id,
-          acc_login : loginInput.value,
-          acc_name : nameInput.value,
-          acc_password : passwordInput.value
-      }
-
-      $.ajax({
-                 url: '/updateUser',
-                 type: 'POST',
-                 dataType: 'JSON',
-                 data: user,
-                 success: location.reload()
-     });
-    }
-    }
-
-    function cancel(){
-      var nameForm = document.getElementById("acc_name" + id)
-      var nameInput = document.getElementById("name" + id)
-      console.log(id)
-      nameForm.removeChild(nameInput);
-      nameForm.innerHTML = oldNameInfo;
-      var loginForm = document.getElementById("acc_login" + id)
-      var loginInput = document.getElementById("login" + id)
-      loginForm.removeChild(loginInput);
-      loginForm.innerHTML = oldLoginInfo;
-      var passwordForm = document.getElementById("acc_password" + id)
-      var passwordInput = document.getElementById("password" + id)
-      passwordForm.removeChild(passwordInput);
-      passwordForm.innerHTML = "";
-      editButton.innerHTML = "Edit"
-      editButton.removeEventListener("click" , update);
-      editButton.addEventListener("click" , editMode);
-      deleteButton.innerHTML = "Delete"
-      deleteButton.removeEventListener("click" , cancel);
-      deleteButton.addEventListener("click" , remove);
-    }
-}
-
-  function remove(){
-    idNum = parseInt(this.id.substring(6,this.id.length ) , 10);
-    id = {acc_id : idNum}
-    login = document.getElementById("acc_login" + idNum).innerHTML
-    console.log(login)
-    if( login !== currentUser)
-    {
-    for (i = 0; i < logins.length ; i ++){
-      if(logins[i] === login){
-        login[i] === ""
-      }
-    }
-
-    $.ajax({
-               url: '/deleteUser',
-               type: 'POST',
-               dataType: 'JSON',
-               data: id,
-               success: location.reload()
-   });
-    }
-    else{
-      var errMsg = document.getElementById("errors")
-      errMsg.innerHTML = "Cannot delete your own account"
-      errMsg.style.visibility = "visible";
-      errMsg.style.color = "red";
-    }
-  }
-
-  function validEdit(login){
-    console.log(login)
-
-   for(i = 0 ; i < logins.length ; i ++){
-     if(logins[i][0] === login){
-       var errMsg = document.getElementById("errors")
-       errMsg.innerHTML = "This account login is already being used"
-       errMsg.style.visibility = "visible";
-       errMsg.style.color = "red";
-       return false;
-     }
-   }
-
-    return true;
-  }
-
 </script>
+      
+      
+      
   </body>
 </html>

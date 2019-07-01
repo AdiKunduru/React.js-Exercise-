@@ -3,5 +3,7 @@
   <host>localhost</host>
   <user>root</user>
   <password>admin</password>
-  <database>csci4131</database>
+  <database>react_ex</database>
 </dbconfig>
+
+
